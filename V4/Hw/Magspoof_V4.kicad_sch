@@ -2402,7 +2402,7 @@
     (property "Value" "TC4424" (at 216.789 66.2686 0)
       (effects (font (size 1.524 1.524)))
     )
-    (property "Footprint" "Library:TC4424EMF(v3)" (at 216.789 77.216 0)
+    (property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" (at 216.789 77.216 0)
       (effects (font (size 1.524 1.524)) hide)
     )
     (property "Datasheet" "https://www.mouser.mx/datasheet/2/268/21998b-53545.pdf" (at 216.789 77.216 0)
@@ -3356,8 +3356,8 @@
     (property "Proveedor" "LCSC" (at 85.725 36.957 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "3" (uuid 44d1efd1-bd6e-4e62-a144-00f06fb43c5b))
     (pin "2" (uuid 91aed42d-8da5-4acb-9343-2d8eff87fabd))
+    (pin "3" (uuid 44d1efd1-bd6e-4e62-a144-00f06fb43c5b))
     (instances
       (project "Magspoof_V4"
         (path "/a54f9b8d-da56-4b4b-9f0d-04fac56db24a"
