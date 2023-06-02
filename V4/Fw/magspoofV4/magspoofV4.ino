@@ -1,6 +1,6 @@
 /************************************************************
-  Magspoof V3
-  Modified version by Salvador Mendoza (salmg.net)
+  Magspoof V4
+  Modified version by Eduardo Contreras
   for Electronic Cats
   
   Original code by Samy Kamk  r (http://samy.pl/magspoof/)
@@ -11,8 +11,7 @@
   Development environment specifics:
   IDE: Arduino 1.8.9
   Hardware Platform:
-  Magspoof V3
-  - SAMD11
+  Magspoof V4
   
   This code is beerware; if you see me (or any other Electronic Cats
   member) at the local, and you've found our code helpful,
@@ -26,21 +25,12 @@
 //    SW = P1.1
 //    LED = P3.4
 
-// DAP Cat
-//    A = P3.2
-//    B = P3.1
-//    SW = P3.0
+#define PINS_PORT 1
+#define PIN_A_BIT 4
+#define PIN_B_BIT 5
 
-#define PIN_A 32
-#define PIN_B 31
-
-#define PINS_PORT 3
-#define PIN_B_BIT 1
-#define PIN_A_BIT 2
-#define PIN_SW_BIT 0
-
-#define BUTTON_PIN 30
-#define LED 33
+#define BUTTON_PIN 11
+#define LED 34
 #define CLOCK_US 500
 
 #define BETWEEN_ZERO 53 // 53 zeros between track1 & 2
@@ -76,16 +66,12 @@ void blink(uint8_t pin, int msdelay, int times){
 // send a single bit out
 void playBit(int sendBit){
   dir ^= 1;
-  //digitalWrite(PIN_A, dir);
-  //digitalWrite(PIN_B, !dir);
   digitalWriteFast(PINS_PORT,PIN_A_BIT, dir);
   digitalWriteFast(PINS_PORT,PIN_B_BIT, !dir);
   delayMicroseconds(CLOCK_US);
 
   if (sendBit){
     dir ^= 1;
-    //digitalWrite(PIN_A, dir);
-    //digitalWrite(PIN_B, !dir);
     digitalWriteFast(PINS_PORT,PIN_A_BIT, dir);
     digitalWriteFast(PINS_PORT,PIN_B_BIT, !dir);
   }
@@ -162,8 +148,6 @@ void playTrack(int track){
   for (int i = 0; i < 5 * 5; i++)
     playBit(0);
 
-  //digitalWrite(PIN_A, LOW);
-  //digitalWrite(PIN_B, LOW);
   digitalWriteFast(PINS_PORT,PIN_A_BIT, LOW);
   digitalWriteFast(PINS_PORT,PIN_B_BIT, LOW);
 }
@@ -213,27 +197,26 @@ void storeRevTrack(int track){
 }
 
 void setup(){
+  Serial0_begin(115200);
   pinMode(LED, OUTPUT);
+  digitalWrite(LED,LOW);
 
   pinModeFast(PINS_PORT,PIN_A_BIT, OUTPUT);
   pinModeFast(PINS_PORT,PIN_B_BIT, OUTPUT);
-  //pinMode(PIN_A, OUTPUT);
-  //pinMode(PIN_B, OUTPUT);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 
   storeRevTrack(TRACKS);
-  //USBSerial_println("MagSpoof");
+  USBSerial_println("MagSpoof test");
 }
 
 void loop(){
-    //if (digitalRead(BUTTON_PIN) == 0){
-    //USBSerial_println("MagSpoof");
-    playTrack(1 + (curTrack++ % 2));
-    
-    digitalWrite(LED,HIGH);
-    delay(200);
-    digitalWrite(LED,LOW);
-    delay(2000);
-  
+    if (digitalRead(BUTTON_PIN) == 0){
+      USBSerial_println("MagSpoof");
+      digitalWrite(LED,HIGH);
+      playTrack(1 + (curTrack++ % 2));
+      delay(500);
+      digitalWrite(LED,LOW);
+      delay(1000);
+    }
   
 }
