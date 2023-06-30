@@ -39,7 +39,7 @@ bool stringComplete = false;
 uint16_t echoCounter = 0;
 
 // consts get stored in flash as we don't adjust them
-char* tracks[2] = {
+char tracks[2][64]= {
 "%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?\0", // Track 1
 ";123456781234567=112220100000000000000?\0" // Track 2
 };
@@ -197,6 +197,14 @@ void storeRevTrack(int track){
   revTrack[i] = '\0';
 }
 
+void s_print(char *s) {
+  for(int i = 0; i < 64 ; i++) {
+      if(s[i] == '?')break;
+      USBSerial_print(s[i]);
+    }
+  USBSerial_println();  
+}
+
 void setup(){
   Serial0_begin(115200);
   pinMode(LED, OUTPUT);
@@ -218,6 +226,8 @@ void loop(){
       playTrack(1 + (curTrack++ % 2));
       delay(500);
       digitalWrite(LED,LOW);
+      s_print(tracks[0]);
+      s_print(tracks[1]);
       delay(1000);
     }
 
@@ -242,20 +252,17 @@ void loop(){
 
   if (stringComplete) {
     
-    if(recvStr[0] == '#') {
-      for(int i = 0; i < 64; i++){
-        tracks[0][i] = recvStr[i+1];
-        if(recvStr[i] == '?'){tracks[0][i + 1] == '\0';break;}
-      }
+    if(recvStr[0] == '%') {
+
+      USBSerial_print("HELL YEAH!");
+      strcpy(tracks[0], recvStr);
     }
 
     USBSerial_print("ECHO:");
     USBSerial_println(recvStr);
-    for(int i = 0; i < 64; i++){
-        USBSerial_print(tracks[0][i]);
-        if(tracks[0][i] == '?')break;
-      }
-      
+
+    s_print(tracks[0]);
+    s_print(tracks[1]);  
     USBSerial_println();
 
     USBSerial_flush();
