@@ -32,9 +32,6 @@
 
 #define TRACKS 2
 
-uint8_t writePtr = 0;
-uint8_t writeData = 0;
-
 //This is a fairly large array, store it in external memory with keyword __xdata
 __xdata char recvStr[64];
 uint8_t recvStrPtr = 0;
@@ -279,15 +276,56 @@ void loop(){
     
     if(recvStr[0] == '%') {
 
-      USBSerial_println("HELL to EEPROM");
+      USBSerial_println("...to EEPROM");
       //strcpy(tracks[0], recvStr);
 
+// pa'cuando se vaya a guardar en eeprom      
+// *********************************************
+//      for(uint8_t i = 0; i < 64 ; i++) {
+//        eeprom_write_byte(i, recvStr[i]);
+//        if(recvStr[i] == '?'){
+//          USBSerial_println("? found");
+//          break;
+//        }
+//      }
+//      dumpEEPROM(); 
+// *********************************************
+
       for(uint8_t i = 0; i < 64 ; i++) {
-        eeprom_write_byte(i, recvStr[i]);
-        if(recvStr[i] == '?'){USBSerial_println("? found");break;}
+        tracks[0][i] = recvStr[i];
+        if(recvStr[i] == '?'){
+          USBSerial_println("? found");
+          break;
+        }
       }
-      dumpEEPROM();  
+    storeRevTrack(TRACKS);
     }
+
+    if(recvStr[0] == ';') {
+
+      for(uint8_t i = 0; i < 64 ; i++) {
+        tracks[1][i] = recvStr[i];
+        if(recvStr[i] == '?'){
+          USBSerial_println("? found");
+          break;
+        }
+      }
+    storeRevTrack(TRACKS);  
+    }
+
+    if(recvStr[0] == 'p') {
+      
+      USBSerial_println("MagSpoof");
+      digitalWrite(LED,HIGH);
+      playTrack(1 + (curTrack++ % 2));
+      delay(500);
+      digitalWrite(LED,LOW);
+      s_print(tracks[0]);
+      s_print(tracks[1]);
+      delay(1000);
+ 
+    }    
+
 
     USBSerial_print("ECHO:");
     USBSerial_println(recvStr);
@@ -300,9 +338,6 @@ void loop(){
     stringComplete = false;
     recvStrPtr = 0;
 
-    echoCounter++;
-    USBSerial_print("echo count: ");
-    USBSerial_println(echoCounter);
     USBSerial_flush();
   }
 }
