@@ -207,7 +207,7 @@ void s_print(char *s) {
 
 void dumpEEPROM() {
   USBSerial_println("DataFlash Dump:");
-  for (uint8_t i = 0; i < 64; i++) {
+  for (uint8_t i = 0; i < 128; i++) {
     char eepromData = eeprom_read_byte(i);
     USBSerial_print(eepromData);
   }
@@ -229,6 +229,13 @@ void setup(){
     tracks[0][i] = eepromData;
     USBSerial_print(tracks[0][i]);
     if(tracks[0][i] == '?')break;
+  }
+
+  for (uint8_t i = 64; i < 128; i++) {
+    char eepromData = eeprom_read_byte(i);
+    tracks[1][i - 64] = eepromData;
+    USBSerial_print(tracks[1][i - 64]);
+    if(tracks[1][i - 64] == '?')break;
   }
   
   USBSerial_println();
@@ -273,23 +280,30 @@ void loop(){
   }
 
   if (stringComplete) {
+
+    if(recvStr[0] == 's') {
+      for(uint8_t i = 0; i < 64 ; i++) {
+        eeprom_write_byte(i, tracks[0][i]);
+        if(tracks[0][i] == '?'){
+          USBSerial_println("? found");
+          break;
+        }
+      }
+      
+      for(uint8_t i = 64; i < 128 ; i++) {
+        eeprom_write_byte(i, tracks[1][i]);
+        if(tracks[1][i] == '?'){
+          USBSerial_println("? found");
+          break;
+        }
+      }
+      dumpEEPROM(); 
+    }
     
     if(recvStr[0] == '%') {
 
       USBSerial_println("...to EEPROM");
       //strcpy(tracks[0], recvStr);
-
-// pa'cuando se vaya a guardar en eeprom      
-// *********************************************
-//      for(uint8_t i = 0; i < 64 ; i++) {
-//        eeprom_write_byte(i, recvStr[i]);
-//        if(recvStr[i] == '?'){
-//          USBSerial_println("? found");
-//          break;
-//        }
-//      }
-//      dumpEEPROM(); 
-// *********************************************
 
       for(uint8_t i = 0; i < 64 ; i++) {
         tracks[0][i] = recvStr[i];
