@@ -31,15 +31,15 @@
 #define BETWEEN_ZERO 53 // 53 zeros between track1 & 2
 
 #define TRACKS 2
-
+#define MAX 80
 //This is a fairly large array, store it in external memory with keyword __xdata
-__xdata char recvStr[64];
+__xdata char recvStr[MAX];
 uint8_t recvStrPtr = 0;
 bool stringComplete = false;
 uint16_t echoCounter = 0;
 
 // consts get stored in flash as we don't adjust them
-char tracks[2][64]= {
+char tracks[2][MAX]= {
 "%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?\0", // Track 1
 ";123456781234567=112220100000000000000?\0" // Track 2
 };
@@ -198,16 +198,16 @@ void storeRevTrack(int track){
 }
 
 void s_print(char *s) {
-  for(int i = 0; i < 64 ; i++) {
-      if(s[i] == '?')break;
+  for(int i = 0; i < MAX ; i++) {
       USBSerial_print(s[i]);
+      if(s[i] == '?')break;
     }
   USBSerial_println();  
 }
 
 void dumpEEPROM() {
   USBSerial_println("DataFlash Dump:");
-  for (uint8_t i = 0; i < 128; i++) {
+  for (uint8_t i = 0; i < 2*MAX; i++) {
     char eepromData = eeprom_read_byte(i);
     USBSerial_print(eepromData);
   }
@@ -224,26 +224,24 @@ void setup(){
   pinModeFast(PINS_PORT,PIN_B_BIT, OUTPUT);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-  for (uint8_t i = 0; i < 64; i++) {
+  for (uint8_t i = 0; i < MAX; i++) {
     char eepromData = eeprom_read_byte(i);
     tracks[0][i] = eepromData;
     USBSerial_print(tracks[0][i]);
-    if(tracks[0][i] == '?')break;
+    if(tracks[0][i] == '?'){tracks[0][i + 1] = '\0';break;}
   }
 
-  for (uint8_t i = 64; i < 128; i++) {
+  for (uint8_t i = MAX; i < 2*MAX; i++) {
     char eepromData = eeprom_read_byte(i);
-    tracks[1][i - 64] = eepromData;
-    USBSerial_print(tracks[1][i - 64]);
-    if(tracks[1][i - 64] == '?')break;
+    tracks[1][i - MAX] = eepromData;
+    USBSerial_print(tracks[1][i - MAX]);
+    if(tracks[1][i - MAX] == '?'){tracks[1][i + 1 - MAX] = '\0';break;}
   }
-  
-  USBSerial_println();
-  USBSerial_flush();
-
-  
 
   storeRevTrack(TRACKS);
+      
+  USBSerial_println();
+  USBSerial_flush();
   USBSerial_println("MagSpoof test");
 
 }
@@ -271,7 +269,7 @@ void loop(){
     } else {
       recvStr[recvStrPtr] = serialChar;
       recvStrPtr++;
-      if (recvStrPtr == 127) {
+      if (recvStrPtr == MAX) {
         recvStr[recvStrPtr] = '\0';
         stringComplete = true;
         break;
@@ -282,17 +280,23 @@ void loop(){
   if (stringComplete) {
 
     if(recvStr[0] == 's') {
-      for(uint8_t i = 0; i < 64 ; i++) {
+
+      USBSerial_println("...to EEPROM");
+      //strcpy(tracks[0], recvStr);
+      
+      for(uint8_t i = 0; i < MAX ; i++) {
         eeprom_write_byte(i, tracks[0][i]);
         if(tracks[0][i] == '?'){
+          eeprom_write_byte(i + 1, '\0');
           USBSerial_println("? found");
           break;
         }
       }
       
-      for(uint8_t i = 64; i < 128 ; i++) {
-        eeprom_write_byte(i, tracks[1][i]);
+      for(uint8_t i = MAX; i < 2*MAX ; i++) {
+        eeprom_write_byte(i, tracks[1][i - MAX]);
         if(tracks[1][i] == '?'){
+          eeprom_write_byte(i + 1, '\0');
           USBSerial_println("? found");
           break;
         }
@@ -301,15 +305,11 @@ void loop(){
     }
     
     if(recvStr[0] == '%') {
-
-      USBSerial_println("...to EEPROM");
-      //strcpy(tracks[0], recvStr);
-
-      for(uint8_t i = 0; i < 64 ; i++) {
+      for(uint8_t i = 0; i < MAX ; i++) {
         tracks[0][i] = recvStr[i];
         if(recvStr[i] == '?'){
           USBSerial_println("? found");
-          break;
+          {tracks[0][i + 1] = '\0';break;}
         }
       }
     storeRevTrack(TRACKS);
@@ -317,11 +317,11 @@ void loop(){
 
     if(recvStr[0] == ';') {
 
-      for(uint8_t i = 0; i < 64 ; i++) {
+      for(uint8_t i = 0; i < MAX ; i++) {
         tracks[1][i] = recvStr[i];
         if(recvStr[i] == '?'){
           USBSerial_println("? found");
-          break;
+          {tracks[1][i + 1] = '\0';break;}
         }
       }
     storeRevTrack(TRACKS);  
@@ -348,7 +348,6 @@ void loop(){
     s_print(tracks[1]);  
     USBSerial_println();
 
-    USBSerial_flush();
     stringComplete = false;
     recvStrPtr = 0;
 
