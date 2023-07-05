@@ -1,7 +1,7 @@
 
 # MagSpoof Electronic Cats - Credit Card/Magstripe Spoofer
 
-<a href="https://electroniccats.com/producto/magspoof-v3/">
+<a href="https://electroniccats.com/store/magspoof-v4/">
   <p align="center">
   <img src="https://electroniccats.com/wp-content/uploads/badge_store.png" height="104" />
   </p>
