@@ -42,7 +42,7 @@ You can see more of my projects at <http://samy.pl> or contact me at <code@samy.
 **[Getting Started in our Wiki](https://github.com/ElectronicCats/magspoof/wiki)**
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/122187221/224170201-16433725-560e-4a18-9d3a-36afa2b3e3f6.jpg" />
+  <img src="https://github.com/AndreaZGuz/magspoof/assets/122187221/4027a6a4-091b-4fed-990a-51ff569010a4" />
 </p>
 
 ------
