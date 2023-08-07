@@ -19,11 +19,6 @@
   Distributed as-is; no warranty is given.
 */
 
-// Magspoof V4
-//    A = P1.4
-//    B = P1.5
-//    SW = P1.1
-//    LED = P3.4
 
 #define PINS_PORT 1
 #define PIN_A_BIT 4
@@ -36,9 +31,15 @@
 #define BETWEEN_ZERO 53 // 53 zeros between track1 & 2
 
 #define TRACKS 2
+#define MAX 80
+//This is a fairly large array, store it in external memory with keyword __xdata
+__xdata char recvStr[MAX];
+uint8_t recvStrPtr = 0;
+bool stringComplete = false;
+uint16_t echoCounter = 0;
 
 // consts get stored in flash as we don't adjust them
-const char* tracks[] = {
+char tracks[2][MAX]= {
 "%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?\0", // Track 1
 ";123456781234567=112220100000000000000?\0" // Track 2
 };
@@ -196,6 +197,24 @@ void storeRevTrack(int track){
   revTrack[i] = '\0';
 }
 
+void s_print(char *s) {
+  for(int i = 0; i < MAX ; i++) {
+      USBSerial_print(s[i]);
+      if(s[i] == '?')break;
+    }
+  USBSerial_println();  
+}
+
+void dumpEEPROM() {
+  USBSerial_println("DataFlash Dump:");
+  for (uint8_t i = 0; i < 2*MAX; i++) {
+    char eepromData = eeprom_read_byte(i);
+    USBSerial_print(eepromData);
+  }
+  USBSerial_println();
+  USBSerial_flush();
+}
+
 void setup(){
   Serial0_begin(115200);
   pinMode(LED, OUTPUT);
@@ -205,8 +224,26 @@ void setup(){
   pinModeFast(PINS_PORT,PIN_B_BIT, OUTPUT);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 
+  for (uint8_t i = 0; i < MAX; i++) {
+    char eepromData = eeprom_read_byte(i);
+    tracks[0][i] = eepromData;
+    USBSerial_print(tracks[0][i]);
+    if(tracks[0][i] == '?'){tracks[0][i + 1] = '\0';break;}
+  }
+
+  for (uint8_t i = MAX; i < 2*MAX; i++) {
+    char eepromData = eeprom_read_byte(i);
+    tracks[1][i - MAX] = eepromData;
+    USBSerial_print(tracks[1][i - MAX]);
+    if(tracks[1][i - MAX] == '?'){tracks[1][i + 1 - MAX] = '\0';break;}
+  }
+
   storeRevTrack(TRACKS);
+      
+  USBSerial_println();
+  USBSerial_flush();
   USBSerial_println("MagSpoof test");
+
 }
 
 void loop(){
@@ -216,7 +253,104 @@ void loop(){
       playTrack(1 + (curTrack++ % 2));
       delay(500);
       digitalWrite(LED,LOW);
+      s_print(tracks[0]);
+      s_print(tracks[1]);
       delay(1000);
     }
-  
+
+  while (USBSerial_available()) {
+    char serialChar = USBSerial_read();
+    if ((serialChar == '\n') || (serialChar == '\r') ) {
+      recvStr[recvStrPtr] = '\0';
+      if (recvStrPtr > 0) {
+        stringComplete = true;
+        break;
+      }
+    } else {
+      recvStr[recvStrPtr] = serialChar;
+      recvStrPtr++;
+      if (recvStrPtr == MAX) {
+        recvStr[recvStrPtr] = '\0';
+        stringComplete = true;
+        break;
+      }
+    }
+  }
+
+  if (stringComplete) {
+
+    if(recvStr[0] == 's') {
+
+      USBSerial_println("...to EEPROM");
+      //strcpy(tracks[0], recvStr);
+      
+      for(uint8_t i = 0; i < MAX ; i++) {
+        eeprom_write_byte(i, tracks[0][i]);
+        if(tracks[0][i] == '?'){
+          eeprom_write_byte(i + 1, '\0');
+          USBSerial_println("? found");
+          break;
+        }
+      }
+      
+      for(uint8_t i = MAX; i < 2*MAX ; i++) {
+        eeprom_write_byte(i, tracks[1][i - MAX]);
+        if(tracks[1][i] == '?'){
+          eeprom_write_byte(i + 1, '\0');
+          USBSerial_println("? found");
+          break;
+        }
+      }
+      dumpEEPROM(); 
+    }
+    
+    if(recvStr[0] == '%') {
+      for(uint8_t i = 0; i < MAX ; i++) {
+        tracks[0][i] = recvStr[i];
+        if(recvStr[i] == '?'){
+          USBSerial_println("? found");
+          {tracks[0][i + 1] = '\0';break;}
+        }
+      }
+    storeRevTrack(TRACKS);
+    }
+
+    if(recvStr[0] == ';') {
+
+      for(uint8_t i = 0; i < MAX ; i++) {
+        tracks[1][i] = recvStr[i];
+        if(recvStr[i] == '?'){
+          USBSerial_println("? found");
+          {tracks[1][i + 1] = '\0';break;}
+        }
+      }
+    storeRevTrack(TRACKS);  
+    }
+
+    if(recvStr[0] == 'p') {
+      
+      USBSerial_println("MagSpoof");
+      digitalWrite(LED,HIGH);
+      playTrack(1 + (curTrack++ % 2));
+      delay(500);
+      digitalWrite(LED,LOW);
+      s_print(tracks[0]);
+      s_print(tracks[1]);
+      delay(1000);
+ 
+    }    
+
+
+    USBSerial_print("ECHO:");
+    USBSerial_println(recvStr);
+
+    s_print(tracks[0]);
+    s_print(tracks[1]);  
+    USBSerial_println();
+
+    stringComplete = false;
+    recvStrPtr = 0;
+
+    USBSerial_flush();
+  }
 }
