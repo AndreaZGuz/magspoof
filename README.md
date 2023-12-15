@@ -1,13 +1,17 @@
 
-# MagSpoof Electronic Cats - Credit Card/Magstripe Spoofer
+# MagSpoof by Electronic Cats
 
+<p align="center">
+  <img src="https://github.com/AndreaZGuz/magspoof/assets/122187221/57ac9daa-35cb-49c5-bb88-a96f14ed777a" />
+</p>
+
+<p align=center>
 <a href="https://electroniccats.com/store/magspoof-v4/">
-  <p align="center">
-  <img src="https://electroniccats.com/wp-content/uploads/badge_store.png" height="104" />
-  </p>
+  <img src="https://electroniccats.com/wp-content/uploads/badge_store.png" width="200" height="104" />
 </a>
+</p>
 
-# How does MagSpoof work?
+# What is MagSpoof?
 
 **MagSpoof Electronic Cats** is a device that can spoof/emulate any magnetic stripe or credit card. It can work "wirelessly", even on **standard magstripe/credit card readers**, by generating a strong electromagnetic field that emulates a traditional magnetic stripe card.
 
@@ -39,10 +43,12 @@ You can see more of my projects at <http://samy.pl> or contact me at <code@samy.
 ------
 
 # Wiki and Getting Started 
-**[Getting Started in our Wiki](https://github.com/ElectronicCats/magspoof/wiki)**
+Click on the image below to go to our Wiki!
 
-<p align="center">
+<p align=center>
+<a href="https://github.com/ElectronicCats/magspoof/wiki">
   <img src="https://github.com/AndreaZGuz/magspoof/assets/122187221/4027a6a4-091b-4fed-990a-51ff569010a4" />
+</a>
 </p>
 
 ------
