@@ -1,5 +1,5 @@
 
-# MagSpoof by Electronic Cats
+# MagSpoof By Electronic Cats
 
 <p align="center">
   <img src="https://github.com/AndreaZGuz/magspoof/assets/122187221/110310b2-5dc3-4f70-af95-51d3af226e4e" />
