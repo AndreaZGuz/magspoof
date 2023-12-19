@@ -2,7 +2,7 @@
 # MagSpoof by Electronic Cats
 
 <p align="center">
-  <img src="https://github.com/AndreaZGuz/magspoof/assets/122187221/57ac9daa-35cb-49c5-bb88-a96f14ed777a" />
+  <img src="https://github.com/AndreaZGuz/magspoof/assets/122187221/110310b2-5dc3-4f70-af95-51d3af226e4e" />
 </p>
 
 <p align=center>
